@@ -170,24 +170,24 @@ class CacheItem:
     @property
     def cache_expiry(self):
         expiry_limits = {
-            "adex_24hr": 5,
-            "adex_weekly": 5,
-            "adex_fortnite": 10,
-            "adex_alltime": 15,
+            "adex_24hr": 15,
+            "adex_weekly": 15,
+            "adex_fortnite": 30,
+            "adex_alltime": 90,
             "coins": 1440,
             "coins_config": 1440,
             "coin_volumes_alltime": 1440,
-            "pairs_last_traded": 5,
+            "pairs_last_traded": 15,
             "gecko_source": 15,
-            "markets_summary": 5,
+            "markets_summary": 15,
             "fixer_rates": 15,
             "pair_volumes_24hr": 15,
             "pair_volumes_14d": 15,
             "pair_volumes_alltime": 15,
             "coin_volumes_24hr": 15,
-            "pairs_orderbook_extended": 15,
-            "gecko_pairs": 5,
-            "tickers": 5,
+            "pairs_orderbook_extended": 30,
+            "gecko_pairs": 15,
+            "tickers": 15,
         }
         if self.name in expiry_limits:
             return expiry_limits[self.name]

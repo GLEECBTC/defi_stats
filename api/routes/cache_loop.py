@@ -202,7 +202,7 @@ def coins():  # pragma: no cover
 
 # VOLUMES CACHE
 @router.on_event("startup")
-@repeat_every(seconds=330)
+@repeat_every(seconds=1800)
 @timed
 def get_coin_volumes_alltime():
     if memcache.get("testing") is None:
@@ -228,7 +228,7 @@ def gecko_data():  # pragma: no cover
 
 
 @router.on_event("startup")
-@repeat_every(seconds=360)
+@repeat_every(seconds=1800)
 @timed
 def gecko_pairs():  # pragma: no cover
     if memcache.get("testing") is None:
@@ -339,7 +339,7 @@ def import_dbs():
 
 
 @router.on_event("startup")
-@repeat_every(seconds=320)
+@repeat_every(seconds=3600)
 @timed
 def adex_alltime():
     if memcache.get("testing") is None:

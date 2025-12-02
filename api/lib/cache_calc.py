@@ -189,7 +189,7 @@ class CacheCalc:
         return self._pairs_orderbook_extended_cache
 
     @timed
-    def pairs_orderbook_extended(self, pairs_days: int = 30, refresh: bool = False):
+    def pairs_orderbook_extended(self, pairs_days: int = 21, refresh: bool = False):
         try:
             if not self._acquire_batch_lock():
                 logger.loop("[orderbook-batch] skipped: batch already running")
