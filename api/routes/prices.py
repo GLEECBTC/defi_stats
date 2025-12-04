@@ -15,7 +15,7 @@ cache = Cache()
 
 @router.get(
     "/tickers_v1",
-    description="Returns data cached from https://prices.komodian.info/api/v1/tickers",
+    description="Returns data cached from https://prices.gleec.com/api/v1/tickers",
     responses={406: {"model": ErrorMessage}},
     status_code=200,
 )
@@ -37,7 +37,7 @@ def get_v1_tickers(expire_at: int = 900):
 
 @router.get(
     "/tickers_v2",
-    description="Returns data cached from https://prices.komodian.info/api/v2/tickers",
+    description="Returns data cached from https://prices.gleec.com/api/v2/tickers",
     responses={406: {"model": ErrorMessage}},
     status_code=200,
 )

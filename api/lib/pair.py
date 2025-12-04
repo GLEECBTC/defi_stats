@@ -379,6 +379,7 @@ class Pair:  # pragma: no cover
                         {variant: template.orderbook_extended(variant)}
                     )
                     variant_cache_name = f"orderbook_{variant}"
+                    cache_exists = memcache.get(variant_cache_name) is not None
                     base, quote = derive.base_quote(variant)
                     variant_orderbook = dex.get_orderbook(
                         base=base,
@@ -390,6 +391,17 @@ class Pair:  # pragma: no cover
                         depth=depth,
                         refresh=refresh,
                     )
+                    if not refresh and not cache_exists:
+                        dex.get_orderbook(
+                            base=base,
+                            quote=quote,
+                            coins_config=self.coins_config,
+                            gecko_source=self.gecko_source,
+                            pair_prices_24hr_cache=self.pair_prices_24hr_cache,
+                            variant_cache_name=variant_cache_name,
+                            depth=depth,
+                            refresh=True,
+                        )
                     if variant_orderbook is not None:
                         combo_orderbook[variant] = variant_orderbook
                         ignore_until = 3
