@@ -309,6 +309,14 @@ def get_adex_alltime():  # pragma: no cover
     return get("adex_alltime")
 
 
+def set_dex_version(data):  # pragma: no cover
+    update("dex_version_info", data, 86400)
+
+
+def get_dex_version():  # pragma: no cover
+    return get("dex_version_info")
+
+
 # REVIEW CACHE (TOO LARGE)
 # def set_summary(data):  # pragma: no cover
 # update("generic_summary", data, 3600)

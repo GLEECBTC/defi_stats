@@ -11,10 +11,12 @@ import util.memcache as memcache
 from lib.cache import Cache, CacheItem, reset_cache_files
 from lib.cache_calc import CacheCalc
 from lib.dex_api import DexAPI
+from lib.dex_version import DexVersionService
 from util.cron import cron
 from util.logger import logger, timed
 
 router = APIRouter()
+dex_version_service = DexVersionService()
 
 
 
@@ -410,3 +412,16 @@ def fix_swap_pairs():
     reset_cache_files()
     time.sleep(10)
     db.SqlUpdate().fix_swap_pairs(trigger="cache_loop")
+
+
+@router.on_event("startup")
+@repeat_every(seconds=86400)
+@timed
+def refresh_dex_version():  # pragma: no cover
+    if memcache.get("testing") is None:
+        try:
+            dex_version_service.refresh()
+        except Exception as e:
+            return default.result(msg=e, loglevel="warning")
+        msg = "dex_version cache refresh complete!"
+        return default.result(msg=msg, loglevel="loop", ignore_until=0)

@@ -23,6 +23,10 @@ API_HOST='0.0.0.0'
 API_PORT=7068
 API_HOST='127.0.0.1'
 POETRY_VERSION='1.6.1'
+
+# GitHub Releases (required for /api/v3/dex_version)
+GH_USER='your_github_username'
+GH_TOKEN='github_pat_or_token_with_repo_scope'
 ```
 - A maintained MM2.db file, ideally sourced from a long running AtomicDEX-API seed node to ensure all data is included. This is periodically sourced via rsync with `./update_MM2.db` (assuming ssh key access). This should be added to cron to check for updates every minute. E.g. `* * * * * /home/admin/defi_stats/update_MM2_db.sh`
 
