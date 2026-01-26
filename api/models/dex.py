@@ -7,3 +7,4 @@ class DexVersionResponse(BaseModel):
     changelog: str
     download_url: str
 
+

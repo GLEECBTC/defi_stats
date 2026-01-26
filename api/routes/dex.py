@@ -24,3 +24,4 @@ def dex_version():
         return JSONResponse(status_code=503, content=err)
     return info
 
+
