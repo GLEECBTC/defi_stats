@@ -24,6 +24,8 @@ from lib.external import gecko_api
 from const import (
     ORDERBOOK_FETCH_BATCH_SIZE,
     ORDERBOOK_FETCH_LOOP_SLEEP,
+    ORDERBOOK_FETCH_PRIORITY_SIZE,
+    ORDERBOOK_FETCH_SWAP_WEIGHT,
 )
 
 
@@ -283,7 +285,6 @@ class CacheCalc:
                     time.sleep(ORDERBOOK_FETCH_LOOP_SLEEP)
             batch_duration = time.perf_counter() - batch_start
             orderbook_data = {}
-            liquidity_usd = 0
             for book in data:
                 depair = deplatform.pair(book["ALL"]["pair"])
                 # Exclude if no activity
@@ -305,7 +306,41 @@ class CacheCalc:
                             orderbook_data[depair].update(
                                 {variant: clean.decimal_dicts(book[variant])}
                             )
-                liquidity_usd += Decimal(book["ALL"]["liquidity_usd"])
+
+            # Merge with previous cache to maximise coverage across batches.
+            prev_cache = memcache.get_pairs_orderbook_extended() or {}
+            prev_books = prev_cache.get("orderbooks") or {}
+            merged_orderbooks = {}
+            active_pairs = set()
+            try:
+                active_ts = cron.now_utc() - 21 * 86400
+                active_pairs = set(
+                    derive.pairs_traded_since(
+                        ts=active_ts, pairs_last_traded_cache=self.pairs_last_traded_cache
+                    )
+                )
+            except Exception as e:  # pragma: no cover
+                logger.warning(f"pairs_orderbook_extended active_pairs failed: {e}")
+
+            for prev_pair, prev_value in prev_books.items():
+                std_prev = sortdata.pair_by_market_cap(
+                    prev_pair, gecko_source=self.gecko_source
+                ) or prev_pair
+                if active_pairs and std_prev not in active_pairs:
+                    continue
+                merged_orderbooks[std_prev] = prev_value
+
+            for depair, depair_book in orderbook_data.items():
+                merged_orderbooks[depair] = depair_book
+
+            orderbook_data = merged_orderbooks
+
+            liquidity_usd = Decimal(0)
+            for pair_book in orderbook_data.values():
+                try:
+                    liquidity_usd += Decimal(str(pair_book["ALL"]["liquidity_usd"]))
+                except Exception:
+                    continue
 
             vols_24hr = self.pair_volumes_24hr()
             if vols_24hr is not None:
@@ -314,7 +349,7 @@ class CacheCalc:
 
             resp = clean.decimal_dicts(
                 {
-                    "pairs_count": len(data),
+                    "pairs_count": len(orderbook_data),
                     "swaps_24hr": swaps_24hr,
                     "volume_usd_24hr": volume_usd_24hr,
                     "combined_liquidity_usd": liquidity_usd,
@@ -401,10 +436,13 @@ class CacheCalc:
         for variant in pair_data.values():
             try:
                 trade_usd = Decimal(str(variant.get("trade_volume_usd", 0) or 0))
+                swaps = Decimal(str(variant.get("total_swaps", 0) or 0))
             except Exception:
                 trade_usd = Decimal(0)
-            if trade_usd > best:
-                best = trade_usd
+                swaps = Decimal(0)
+            score = trade_usd + swaps * Decimal(ORDERBOOK_FETCH_SWAP_WEIGHT)
+            if score > best:
+                best = score
         return best
 
     def _build_sorted_eligible_pairs(self, depairs, volumes_map):
@@ -421,24 +459,36 @@ class CacheCalc:
     def _select_pair_batch(self, pairs):
         if not pairs:
             return ([], {"start": 0, "next": 0})
+        batch_size = min(ORDERBOOK_FETCH_BATCH_SIZE, len(pairs))
+        priority_size = min(ORDERBOOK_FETCH_PRIORITY_SIZE, batch_size)
+
+        priority_pairs = pairs[:priority_size]
+        remainder = pairs[priority_size:]
+
         pointer = memcache.get(ORDERBOOK_QUEUE_POINTER_KEY)
         try:
             pointer = int(pointer)
         except (TypeError, ValueError):
             pointer = 0
-        pointer = pointer % len(pairs)
-        batch = []
-        idx = pointer
-        processed = 0
-        batch_size = min(ORDERBOOK_FETCH_BATCH_SIZE, len(pairs))
-        while processed < batch_size:
-            batch.append(pairs[idx])
-            idx = (idx + 1) % len(pairs)
-            processed += 1
-            if idx == pointer:
-                break
-        memcache.update(ORDERBOOK_QUEUE_POINTER_KEY, idx, 3600)
-        return batch, {"start": pointer, "next": idx}
+
+        batch = list(priority_pairs)
+        if remainder:
+            pointer = pointer % len(remainder)
+            idx = pointer
+            processed = 0
+            remainder_quota = batch_size - priority_size
+            while processed < remainder_quota:
+                batch.append(remainder[idx])
+                idx = (idx + 1) % len(remainder)
+                processed += 1
+                if idx == pointer:
+                    break
+            memcache.update(ORDERBOOK_QUEUE_POINTER_KEY, idx, 3600)
+            next_ptr = idx
+        else:
+            next_ptr = pointer
+
+        return batch, {"start": pointer, "next": next_ptr}
 
     def _acquire_batch_lock(self):
         try:
@@ -807,6 +857,30 @@ class CacheCalc:
                 volumes = self.pair_volumes_24hr_cache
                 prices = self.pair_prices_24hr_cache
                 if None not in [self.coins_config, book, volumes, prices]:
+                    # Start with previous cache so batches accumulate coverage.
+                    prev_cache = memcache.get_tickers() or {}
+                    prev_data = prev_cache.get("data") or {}
+                    merged_data = {}
+                    active_pairs = set()
+                    try:
+                        # Keep only pairs traded in the last 21 days.
+                        active_ts = cron.now_utc() - 21 * 86400
+                        active_pairs = set(
+                            derive.pairs_traded_since(
+                                ts=active_ts, pairs_last_traded_cache=self.pairs_last_traded_cache
+                            )
+                        )
+                    except Exception as e:  # pragma: no cover
+                        logger.warning(f"tickers active_pairs failed: {e}")
+
+                    for prev_pair, prev_value in prev_data.items():
+                        std_prev = sortdata.pair_by_market_cap(
+                            prev_pair, gecko_source=self.gecko_source
+                        ) or prev_pair
+                        if active_pairs and std_prev not in active_pairs:
+                            continue
+                        merged_data[std_prev] = prev_value
+
                     sorted_pairs = list(
                         set(
                             [
@@ -823,7 +897,7 @@ class CacheCalc:
                         "swaps_count": volumes["total_swaps"],
                         "combined_volume_usd": volumes["trade_volume_usd"],
                         "combined_liquidity_usd": book["combined_liquidity_usd"],
-                        "data": {},
+                        "data": merged_data,
                     }
                     ok = 0
                     not_ok = 0
@@ -856,7 +930,22 @@ class CacheCalc:
                                 (standard is {std})"
                             )
                             not_ok += 1
-                    logger.calc(f"{ok}/{ok + not_ok} pairs added to tickers cache")
+                    # Recompute counts/liquidity with merged data.
+                    resp["pairs_count"] = len(resp["data"])
+                    try:
+                        total_liquidity = sum(
+                            [
+                                Decimal(str(i.get("liquidity_usd", 0)))
+                                for i in resp["data"].values()
+                            ]
+                        )
+                        resp["combined_liquidity_usd"] = convert.format_10f(
+                            total_liquidity
+                        )
+                    except Exception as e:  # pragma: no cover
+                        logger.warning(f"tickers liquidity sum failed: {e}")
+
+                    logger.calc(f"{ok}/{ok + not_ok} pairs added/merged into tickers cache")
                 # Not needed, done in cache.py
                 # memcache.set_tickers(resp)
                 msg = "Tickers cache updated"

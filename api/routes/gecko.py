@@ -50,6 +50,16 @@ def gecko_pairs():
 def gecko_tickers():
     try:
         data = memcache.get_tickers()
+        if not data or "data" not in data:
+            logger.warning("gecko_tickers: tickers cache missing or malformed, returning empty payload")
+            return {
+                "last_update": int(cron.now_utc()),
+                "pairs_count": data.get("pairs_count", 0) if isinstance(data, dict) else 0,
+                "swaps_count": data.get("swaps_count", 0) if isinstance(data, dict) else 0,
+                "combined_volume_usd": data.get("combined_volume_usd", "0") if isinstance(data, dict) else "0",
+                "combined_liquidity_usd": data.get("combined_liquidity_usd", "0") if isinstance(data, dict) else "0",
+                "data": [],
+            }
         resp = {
             "last_update": int(cron.now_utc()),
             "pairs_count": data["pairs_count"],
@@ -61,15 +71,21 @@ def gecko_tickers():
         gecko_source = memcache.get_gecko_source()
         for depair in data["data"]:
             std_pair = sortdata.pair_by_market_cap(depair, gecko_source=gecko_source)
+            if std_pair is None:
+                std_pair = depair
             if depair == std_pair:
                 resp["data"].append(data["data"][depair])
+            elif std_pair in data["data"]:
+                # Prefer the standardised name if present
+                resp["data"].append(data["data"][std_pair])
             elif invert.pair(depair) in data["data"]:
                 logger.warning(
-                    f"Non standard {depair} exists in memcache.get_tickers(), should be {std_pair}"
-                )                
+                    f"Non standard {depair} exists in memcache.get_tickers(), should be {std_pair}. Including as-is."
+                )
+                resp["data"].append(data["data"][depair])
             else:
                 logger.warning(
-                    f"{depair} not found in memcache.get_tickers()"
+                    f"{depair} not found in memcache.get_tickers() (std {std_pair})"
                 )
                 # TODO: This should be threaded to avoid blocking
                 # db_update.fix_swap_pair(depair, pgdb_query)
@@ -93,7 +109,10 @@ def gecko_orderbook(
 ):
     # No extras needed, but cache combines variants.
     try:
-        book = memcache.get_pairs_orderbook_extended()
+        book = memcache.get_pairs_orderbook_extended() or {}
+        if "orderbooks" not in book or book.get("orderbooks") is None:
+            logger.warning("gecko_orderbook: pairs_orderbook_extended cache missing; falling back to direct fetch")
+            book = {"orderbooks": {}}
         depair = deplatform.pair(pair_str)
         if depair in book["orderbooks"]:
             data = book["orderbooks"][depair]["ALL"]

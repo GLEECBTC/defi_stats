@@ -107,7 +107,7 @@ class FixerAPI:  # pragma: no cover
     def latest(self):
         try:
             # TODO: move this to defi-stats.komodo.earth
-            return requests.get("https://rates.komodo.earth/api/v1/usd_rates").json()
+            return requests.get("https://defistats.gleec.com/api/v3/markets/fiat_rates").json()
             """
             if self.api_key == "":
                 raise ApiKeyNotFoundException("FIXER_API key not set!")
