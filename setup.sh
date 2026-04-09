@@ -13,7 +13,7 @@ sudo apt install python3.10 python3.10-distutils python3.10-venv python3.10-dev 
 curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
 
 echo "Getting coins..."
-wget https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins
+wget https://raw.githubusercontent.com/GLEECBTC/coins/master/coins
 cp coins $(pwd)/mm2/coins
 cp coins $(pwd)/mm2_8762/coins
 cp coins $(pwd)/mm2_6133/coins

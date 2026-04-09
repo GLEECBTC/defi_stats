@@ -7,7 +7,7 @@ class Urls:
         self.options = []
         default.params(self, self.kwargs, self.options)
         self.bar = "https://api.github.com/users/smk762"
-        coins_repo = "https://raw.githubusercontent.com/KomodoPlatform/coins"
+        coins_repo = "https://raw.githubusercontent.com/GLEECBTC/coins"
         self.coins = f"{coins_repo}/master/coins"
         self.coins_config = f"{coins_repo}/master/utils/coins_config.json"
         prices_api = "https://prices.gleec.com"

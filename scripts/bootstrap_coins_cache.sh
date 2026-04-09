@@ -24,8 +24,8 @@ CACHE_DIR="${REPO_ROOT}/api/cache/coins"
 COINS_JSON="${CACHE_DIR}/coins.json"
 COINS_CONFIG_JSON="${CACHE_DIR}/coins_config.json"
 
-COINS_CACHE_URL="${COINS_CACHE_URL:-https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins}"
-COINS_CONFIG_URL="${COINS_CONFIG_URL:-https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json}"
+COINS_CACHE_URL="${COINS_CACHE_URL:-https://raw.githubusercontent.com/GLEECBTC/coins/master/coins}"
+COINS_CONFIG_URL="${COINS_CONFIG_URL:-https://raw.githubusercontent.com/GLEECBTC/coins/master/utils/coins_config.json}"
 
 mkdir -p "${CACHE_DIR}"
 
