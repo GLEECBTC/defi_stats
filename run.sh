@@ -15,6 +15,7 @@ cd "${ROOT_DIR}"
 docker compose stop
 cat "${COINS_CACHE}" | jq .data > "${ROOT_DIR}/mm2/coins"
 cat "${COINS_CACHE}" | jq .data > "${ROOT_DIR}/mm2_8762/coins"
+cat "${COINS_CACHE}" | jq .data > "${ROOT_DIR}/mm2_6133/coins"
 docker compose build
 docker compose up -d 
 
@@ -24,3 +25,4 @@ echo " - docker compose logs fastapi -f --tail 23"
 echo " - docker compose logs pgsqldb -f --tail 23"
 echo " - docker compose logs komodefi -f --tail 23"
 echo " - docker compose logs komodefi_8762 -f --tail 23"
+echo " - docker compose logs komodefi_6133 -f --tail 23"
