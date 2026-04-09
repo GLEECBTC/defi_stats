@@ -1,0 +1,5 @@
+coins
+*.json
+MM2*
+DB/*
+!MM2.template.json

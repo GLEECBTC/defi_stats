@@ -48,7 +48,7 @@ Refer to https://docs.docker.com/compose/install/linux/#install-using-the-reposi
 
 #### Setup mm2
 
-- Create `mm2/.env`, and `mm2_8762/.env` with the following inside (change the userpass)
+- Create `mm2/.env`, `mm2_8762/.env` and `mm2_6133/.env` with the following inside (change the userpass; `mm2_6133` is the primary node)
 ```
 MM_CONF_PATH=/home/komodian/mm2/MM2.json
 MM_COINS_PATH=/home/komodian/mm2/coins
@@ -57,7 +57,7 @@ USERPASS=RPC_CONTRoL_USERP@SSW0RD
 USER_ID=1000
 GROUP_ID=1000
 ```
-- Next, create `mm2/MM2.json` and `mm2_8762/MM2.json`. Use the templates in each folder - `cp mm2/MM2.template.json mm2/MM2.json`. Change the passphrases.
+- Next, create `mm2/MM2.json`, `mm2_8762/MM2.json` and `mm2_6133/MM2.json`. Use the templates in each folder - `cp mm2/MM2.template.json mm2/MM2.json`. Change the passphrases.
 
 - Get the latest coins file for each mm2 folder with `wget https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins`
 
@@ -123,14 +123,20 @@ POSTGRES_PASSWORD=db_pass
 ## Sqlite
 LOCAL_MM2_DB_PATH_7777="/home/komodian/api/db/local/MM2_7777.db"
 LOCAL_MM2_DB_PATH_8762="/home/komodian/api/db/local/MM2_8762.db"
+LOCAL_MM2_DB_PATH_6133="/home/komodian/api/db/local/MM2_6133.db"
 HOST_LOCAL_MM2_DB_PATH_7777="/home/hound/defi_stats/api/db/local/MM2_7777.db"
 HOST_LOCAL_MM2_DB_PATH_8762="/home/hound/defi_stats/api/db/local/MM2_8762.db"
+HOST_LOCAL_MM2_DB_PATH_6133="/home/hound/defi_stats/api/db/local/MM2_6133.db"
+LOCAL_MM2_DB_PATH_SEED="/home/komodian/mm2/DB/43ec929fe30ee72be42c9162c56dde910a05e50d/MM2.db"
+LOCAL_MM2_DB_PATH_SEED_6133="/home/komodian/mm2_6133/DB/43ec929fe30ee72be42c9162c56dde910a05e50d/MM2.db"
 
 # Komodo DeFi (hosts below are docker services, set to 127.0.0.1 if not using docker)
 DEXAPI_7777_HOST="http://komodefi"
 DEXAPI_8762_HOST="http://komodefi_8762"
+DEXAPI_6133_HOST="http://komodefi_6133"
 DEXAPI_7777_PORT="7877"
 DEXAPI_8762_PORT="7862"
+DEXAPI_6133_PORT="7783"
 
 
 # AtomicDEX API

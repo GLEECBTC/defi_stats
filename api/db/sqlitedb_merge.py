@@ -7,8 +7,10 @@ from typing import List
 from const import (
     LOCAL_MM2_DB_PATH_7777,
     LOCAL_MM2_DB_PATH_8762,
+    LOCAL_MM2_DB_PATH_6133,
     LOCAL_MM2_DB_BACKUP_7777,
     LOCAL_MM2_DB_BACKUP_8762,
+    LOCAL_MM2_DB_BACKUP_6133,
     MM2_DB_PATHS,
     DB_SOURCE_PATH,
     DB_CLEAN_PATH,
@@ -77,6 +79,8 @@ class SqliteMerge:
         db_7777 = get_sqlite_db(db_path=path)
         path = MM2_DB_PATHS["temp_8762"] if temp else MM2_DB_PATHS["8762"]
         db_8762 = get_sqlite_db(db_path=path)
+        path = MM2_DB_PATHS["temp_6133"] if temp else MM2_DB_PATHS["6133"]
+        db_6133 = get_sqlite_db(db_path=path)
         path = MM2_DB_PATHS["temp_ALL"] if temp else MM2_DB_PATHS["ALL"]
         db_all = get_sqlite_db(db_path=path)
 
@@ -85,14 +89,16 @@ class SqliteMerge:
         msg_7777 = f"7777: {rows}"
         rows = db_8762.query.get_row_count("stats_swaps")
         msg_8762 = f"8762: {rows}"
+        rows = db_6133.query.get_row_count("stats_swaps")
+        msg_6133 = f"6133: {rows}"
         rows = db_all.query.get_row_count("stats_swaps")
         msg_ALL = f"ALL: {rows}"
-        msg = f"Master DB rows: [{msg_7777}] [{msg_8762}] [{msg_ALL}]"
+        msg = f"Master DB rows: [{msg_7777}] [{msg_8762}] [{msg_6133}] [{msg_ALL}]"
 
-        for i in [db_all, db_8762, db_7777]:
+        for i in [db_all, db_6133, db_8762, db_7777]:
             i.close()
         if temp:
-            msg = f"Temp DB rows: [{msg_7777}] [{msg_8762}] [{msg_ALL}]"
+            msg = f"Temp DB rows: [{msg_7777}] [{msg_8762}] [{msg_6133}] [{msg_ALL}]"
         return default.result(msg=msg, loglevel="merge")
 
     @timed
@@ -223,6 +229,10 @@ class SqliteMerge:
                 src_db_path=LOCAL_MM2_DB_PATH_8762,
                 dest_db_path=LOCAL_MM2_DB_BACKUP_8762,
             )
+            self.backup_db(
+                src_db_path=LOCAL_MM2_DB_PATH_6133,
+                dest_db_path=LOCAL_MM2_DB_BACKUP_6133,
+            )
         except Exception as e:  # pragma: no cover
             return default.result(msg=e, loglevel="warning")
         msg = "Merge of local source data into backup databases complete!"
@@ -286,6 +296,8 @@ class SqliteMerge:
                 LOCAL_MM2_DB_PATH_7777,
                 LOCAL_MM2_DB_BACKUP_8762,
                 LOCAL_MM2_DB_PATH_8762,
+                LOCAL_MM2_DB_BACKUP_6133,
+                LOCAL_MM2_DB_PATH_6133,
             ]:
                 db = get_sqlite_db(db_path=i)
                 self.init_stats_swaps_db(db)

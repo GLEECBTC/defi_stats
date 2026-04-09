@@ -16,6 +16,8 @@ def get_mm2_rpc_port(netid=MM2_NETID):
 def get_netid(filename):
     if "7777" in filename:
         return "7777"
+    if "6133" in filename:
+        return "6133"
     if filename.startswith("seed"):
         return "7777"
     else:

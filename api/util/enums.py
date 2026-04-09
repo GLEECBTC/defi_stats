@@ -25,6 +25,7 @@ class TradeType(str, Enum):
 class NetId(str, Enum):
     NETID_7777 = "7777"
     NETID_8762 = "8762"
+    NETID_6133 = "6133"
     ALL = "ALL"
 
 
