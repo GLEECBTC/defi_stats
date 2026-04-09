@@ -16,6 +16,7 @@ echo "Getting coins..."
 wget https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins
 cp coins $(pwd)/mm2/coins
 cp coins $(pwd)/mm2_8762/coins
+cp coins $(pwd)/mm2_6133/coins
 echo "Bootstrapping API coin cache..."
 $(pwd)/scripts/bootstrap_coins_cache.sh --force
 
@@ -56,6 +57,21 @@ echo "MM_LOG=/home/komodian/mm2/mm2.log" >> mm2_8762/.env
 echo "USERPASS=${userpass}" >> mm2_8762/.env
 echo "USER_ID=${USER_ID}" >> mm2_8762/.env
 echo "GROUP_ID=${GROUP_ID}" >> mm2_8762/.env
+
+echo "Setting up .env [netid 6133] file..."
+rpc_password="$(openssl rand -hex 20)-E"
+passphrase=$(openssl rand -hex 128)
+contents=$(jq '.rpc_password = "'${rpc_password}'"' $(pwd)/mm2_6133/MM2.template.json) && echo -E "${contents}" > $(pwd)/mm2_6133/MM2.json
+contents=$(jq '.passphrase = "'${passphrase}'"' $(pwd)/mm2_6133/MM2.json) && echo -E "${contents}" > $(pwd)/mm2_6133/MM2.json
+
+userpass=$(cat mm2_6133/MM2.json | jq -r '.rpc_password')
+
+echo "MM_CONF_PATH=/home/komodian/mm2/MM2.json" > mm2_6133/.env
+echo "MM_COINS_PATH=/home/komodian/mm2/coins" >> mm2_6133/.env
+echo "MM_LOG=/home/komodian/mm2/mm2.log" >> mm2_6133/.env
+echo "USERPASS=${userpass}" >> mm2_6133/.env
+echo "USER_ID=${USER_ID}" >> mm2_6133/.env
+echo "GROUP_ID=${GROUP_ID}" >> mm2_6133/.env
 
 echo "username=${USER}" > username
 

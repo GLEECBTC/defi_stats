@@ -1434,7 +1434,7 @@ class Templates:  # pragma: no cover
             "total_bids_rel_vol": {"decimal": "0"},
             "asks": [],
             "bids": [],
-            "net_id": 7777,
+            "net_id": 6133,
             "timestamp": 1694183345,
         }
 

@@ -8,6 +8,7 @@ import threading
 from const import (
     MM2_RPC_PORTS,
     MM2_RPC_HOSTS,
+    MM2_NETID,
     API_ROOT_PATH,
     DEXAPI_USERPASS,
     ORDERBOOK_CACHE_MIN_TRADES,
@@ -53,7 +54,7 @@ def _record_orderbook_cache_result(pair_str: str, cached: bool):
 class DexAPI:
     def __init__(self):
         try:
-            self.netid = "8762"
+            self.netid = str(MM2_NETID)
             self.userpass = DEXAPI_USERPASS
             self.mm2_host = MM2_RPC_HOSTS[self.netid]
             self.mm2_port = MM2_RPC_PORTS[str(self.netid)]
