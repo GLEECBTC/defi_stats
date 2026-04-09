@@ -4,6 +4,7 @@ from lib.coins import Coins
 from util.logger import timed, logger
 from util.transform import sortdata, derive, invert, merge
 from util.cron import cron
+from const import MM2_NETID
 import util.defaults as default
 import util.memcache as memcache
 from lib.external import gecko_api
@@ -14,7 +15,7 @@ class Markets:
         try:
             self._coins_config = coins_config
             self._gecko_source = gecko_source
-            self.netid = 6133
+            self.netid = MM2_NETID
             self.coins = Coins()
             self.segwit_coins = self.coins.with_segwit
         except Exception as e:  # pragma: no cover
