@@ -11,7 +11,7 @@ SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 API_ROOT_PATH = os.path.dirname(os.path.dirname(SCRIPT_PATH))
 PROJECT_ROOT_PATH = os.path.dirname(API_ROOT_PATH)
 
-COINS_CONFIG_URL = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
+COINS_CONFIG_URL = "https://raw.githubusercontent.com/GLEECBTC/coins/master/utils/coins_config.json"
 
 
 class CmcAPI:  # pragma: no cover

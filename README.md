@@ -59,7 +59,7 @@ GROUP_ID=1000
 ```
 - Next, create `mm2/MM2.json`, `mm2_8762/MM2.json` and `mm2_6133/MM2.json`. Use the templates in each folder - `cp mm2/MM2.template.json mm2/MM2.json`. Change the passphrases.
 
-- Get the latest coins file for each mm2 folder with `wget https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins`
+- Get the latest coins file for each mm2 folder with `wget https://raw.githubusercontent.com/GLEECBTC/coins/master/coins`
 
 #### Bootstrap cache files
 
@@ -140,8 +140,8 @@ DEXAPI_6133_PORT="7783"
 
 
 # AtomicDEX API
-COINS_CONFIG_URL='https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json'
-COINS_URL='https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins'
+COINS_CONFIG_URL='https://raw.githubusercontent.com/GLEECBTC/coins/master/utils/coins_config.json'
+COINS_URL='https://raw.githubusercontent.com/GLEECBTC/coins/master/coins'
 
 ```
 
