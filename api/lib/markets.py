@@ -14,7 +14,7 @@ class Markets:
         try:
             self._coins_config = coins_config
             self._gecko_source = gecko_source
-            self.netid = 8762
+            self.netid = 6133
             self.coins = Coins()
             self.segwit_coins = self.coins.with_segwit
         except Exception as e:  # pragma: no cover

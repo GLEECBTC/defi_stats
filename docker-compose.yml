@@ -16,6 +16,7 @@ services:
     depends_on:
       - pgsqldb
       - komodefi_8762
+      - komodefi_6133
       - memcached
     logging:
       driver: "json-file"
@@ -58,6 +59,34 @@ services:
         soft: 65535
         hard: 65535
 
+  komodefi_6133:
+    container_name: komodefi_6133
+    env_file:
+      - ./mm2_6133/.env
+    build:
+      context: ./mm2_6133
+      dockerfile: Dockerfile
+      args:
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
+    volumes:
+      - ./mm2_6133:/home/komodian/mm2
+    ports:
+      - 127.0.0.1:7783:7783
+      - 127.0.0.1:32326:32326
+      - 127.0.0.1:32336:32336
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    restart: always
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+
   memcached:
     container_name: memcached
     image: memcached:latest
@@ -83,7 +112,7 @@ services:
     env_file:
       - ./api/.env
     depends_on:
-      - komodefi_8762
+      - komodefi_6133
     ports:
       - "127.0.0.1:5432:5432"
     logging:

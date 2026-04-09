@@ -1,7 +1,7 @@
 from typing import List, Dict
 from util.cron import cron
 from util.exceptions import NoDefaultForKeyError
-from const import DEXAPI_8762_HOST
+from const import DEXAPI_8762_HOST, DEXAPI_6133_HOST
 from dotenv import load_dotenv
 from util.logger import timed
 
@@ -42,7 +42,7 @@ def default_val(key: str):
             if val.lower() == "kmd":
                 return "KMD"
             if val.lower() == "default_host":
-                return DEXAPI_8762_HOST
+                return DEXAPI_6133_HOST
             if val.lower() == "now":
                 return int(cron.now_utc())
             else:

@@ -46,14 +46,17 @@ else:
 if IN_DOCKER:
     DEXAPI_7777_HOST = os.getenv("DEXAPI_7777_HOST")
     DEXAPI_8762_HOST = os.getenv("DEXAPI_8762_HOST")
+    DEXAPI_6133_HOST = os.getenv("DEXAPI_6133_HOST")
 else:
     DEXAPI_7777_HOST = "http://127.0.0.1"
     DEXAPI_8762_HOST = "http://127.0.0.1"
+    DEXAPI_6133_HOST = "http://127.0.0.1"
     POSTGRES_HOST = "127.0.0.1"
 
 
 DEXAPI_7777_PORT = os.getenv("DEXAPI_7777_PORT")
 DEXAPI_8762_PORT = os.getenv("DEXAPI_8762_PORT")
+DEXAPI_6133_PORT = os.getenv("DEXAPI_6133_PORT")
 
 # Project path URLs
 API_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -86,6 +89,13 @@ if LOCAL_MM2_DB_PATH_8762 is None and NODE_TYPE != "process":
     print("You need to set 'LOCAL_MM2_DB_PATH_8762' in api/.env")
     sys.exit()
 
+# Path of active MM2.db database for NetId 6133 running
+# in this repos docker container [if NODE_TYPE is not 'process']
+LOCAL_MM2_DB_PATH_6133 = os.getenv("LOCAL_MM2_DB_PATH_6133")
+if LOCAL_MM2_DB_PATH_6133 is None and NODE_TYPE != "process":
+    print("You need to set 'LOCAL_MM2_DB_PATH_6133' in api/.env")
+    sys.exit()
+
 # Paths for backups of mm2 instances running in local docker container
 DB_SOURCE_PATH = f"{PROJECT_ROOT_PATH}/api/db/source"
 DB_CLEAN_PATH = f"{PROJECT_ROOT_PATH}/api/db/cleaned"
@@ -93,41 +103,50 @@ DB_MASTER_PATH = f"{PROJECT_ROOT_PATH}/api/db/master"
 DB_LOCAL_PATH = f"{PROJECT_ROOT_PATH}/api/db/local"
 LOCAL_MM2_DB_BACKUP_7777 = f"{DB_SOURCE_PATH}/local_MM2_7777.db"
 LOCAL_MM2_DB_BACKUP_8762 = f"{DB_SOURCE_PATH}/local_MM2_8762.db"
+LOCAL_MM2_DB_BACKUP_6133 = f"{DB_SOURCE_PATH}/local_MM2_6133.db"
 
 # Paths for "master" databases, which import seed node databases
 MM2_DB_PATH_ALL = f"{DB_MASTER_PATH}/MM2_all.db"
 MM2_DB_PATH_7777 = f"{DB_MASTER_PATH}/MM2_7777.db"
 MM2_DB_PATH_8762 = f"{DB_MASTER_PATH}/MM2_8762.db"
+MM2_DB_PATH_6133 = f"{DB_MASTER_PATH}/MM2_6133.db"
 MM2_DB_PATH_SEED = f"{DB_LOCAL_PATH}/MM2_8762.db"
 LOCAL_MM2_DB_PATH_SEED = os.getenv("LOCAL_MM2_DB_PATH_SEED")
+LOCAL_MM2_DB_PATH_SEED_6133 = os.getenv("LOCAL_MM2_DB_PATH_SEED_6133")
 
 
 # Database paths as a dict, for convenience
 MM2_DB_PATHS = {
     "7777": MM2_DB_PATH_7777,
     "8762": MM2_DB_PATH_8762,
+    "6133": MM2_DB_PATH_6133,
     "ALL": MM2_DB_PATH_ALL,
     "temp_ALL": f"{DB_CLEAN_PATH}/temp_MM2_ALL.db",
     "temp_7777": f"{DB_CLEAN_PATH}/temp_MM2_7777.db",
     "temp_8762": f"{DB_CLEAN_PATH}/temp_MM2_8762.db",
+    "temp_6133": f"{DB_CLEAN_PATH}/temp_MM2_6133.db",
     "local_7777": LOCAL_MM2_DB_PATH_7777,
     "local_8762": LOCAL_MM2_DB_PATH_8762,
+    "local_6133": LOCAL_MM2_DB_PATH_6133,
     "local_7777_backup": LOCAL_MM2_DB_BACKUP_7777,
     "local_8762_backup": LOCAL_MM2_DB_BACKUP_8762,
+    "local_6133_backup": LOCAL_MM2_DB_BACKUP_6133,
 }
 
 # KomodoPlatform DeFi API config.
 MM2_RPC_PORTS = {
     "7777": int(DEXAPI_7777_PORT),
     "8762": int(DEXAPI_8762_PORT),
-    "ALL": int(DEXAPI_8762_PORT),
+    "6133": int(DEXAPI_6133_PORT),
+    "ALL": int(DEXAPI_6133_PORT),
 }
 MM2_RPC_HOSTS = {
     "7777": DEXAPI_7777_HOST,
     "8762": DEXAPI_8762_HOST,
-    "ALL": DEXAPI_8762_HOST,
+    "6133": DEXAPI_6133_HOST,
+    "ALL": DEXAPI_6133_HOST,
 }
-MM2_NETID = 8762  # The primary active NetId currently supported by KomodoPlatform
+MM2_NETID = 6133  # The primary active NetId currently supported by KomodoPlatform
 
 # Some coins may have swaps data, but are not currently in the coins repo.
 CoinConfigNotFoundCoins = ["XEP", "MORTY", "RICK", "SMTF-v2"]

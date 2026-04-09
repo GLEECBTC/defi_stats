@@ -16,6 +16,7 @@ cd "${ROOT_DIR}"
 docker compose stop
 cat "${COINS_CACHE}" | jq .data > "${ROOT_DIR}/mm2/coins"
 cat "${COINS_CACHE}" | jq .data > "${ROOT_DIR}/mm2_8762/coins"
+cat "${COINS_CACHE}" | jq .data > "${ROOT_DIR}/mm2_6133/coins"
 docker compose build
 docker compose up -d 
 docker compose logs -f --tail 23
