@@ -1,4 +1,4 @@
-FROM gleec/komodo-defi-framework:dev-latest
+FROM komodoofficial/komodo-defi-framework:dev-latest
 
 LABEL maintainer="smk@komodoplatform.com"
 
