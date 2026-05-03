@@ -209,4 +209,4 @@ async def custom_swagger_ui_html():
 """
 
 if __name__ == "__main__":  # pragma: no cover
-    uvicorn.run("main:app", host=API_HOST, port=API_PORT, reload=True)
+    uvicorn.run("main:app", host=API_HOST, port=API_PORT, reload=DEVMODE)
