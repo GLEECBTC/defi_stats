@@ -287,11 +287,22 @@ class CacheCalc:
             orderbook_data = {}
             for book in data:
                 depair = deplatform.pair(book["ALL"]["pair"])
+                # Source-of-truth 24h volume: SQL-aggregated ALL from
+                # pair_volumes_24hr. The per-variant trade_volume_usd in the
+                # live orderbook is 0 here because pair_std-grouped volume keys
+                # are deplatformed ("BRLA_LTC") while pair_prices_24hr expects
+                # platform-qualified keys ("BRLA-GNO_LTC-segwit"). See BRLA_LTC.md.
+                pair_volume_24h = Decimal(str(
+                    volumes_map.get(depair, {}).get("ALL", {}).get(
+                        "trade_volume_usd", 0
+                    ) or 0
+                ))
                 # Exclude if no activity
                 if depair not in orderbook_data:
                     if (
                         Decimal(book["ALL"]["liquidity_usd"]) > 0
                         or Decimal(book["ALL"]["trade_volume_usd"]) > 0
+                        or pair_volume_24h > 0
                     ):
                         orderbook_data.update({depair: {}})
                     else:
