@@ -309,10 +309,12 @@ class CacheCalc:
                         continue
                 for variant in book:
                     if book[variant] is not None:
-                        # Exclude if no activity
+                        # Exclude if no activity (same pair_volume_24h fallback
+                        # as depair gate — required so "ALL" is populated)
                         if (
                             Decimal(book[variant]["liquidity_usd"]) > 0
                             or Decimal(book[variant]["trade_volume_usd"]) > 0
+                            or pair_volume_24h > 0
                         ):
                             orderbook_data[depair].update(
                                 {variant: clean.decimal_dicts(book[variant])}
