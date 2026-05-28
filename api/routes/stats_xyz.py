@@ -127,6 +127,8 @@ def summary():
         data = memcache.get_pairs_orderbook_extended()
         resp = []
         for depair in data["orderbooks"]:
+            if "ALL" not in data["orderbooks"][depair]:
+                continue
             resp.append(
                 transform.ticker_to_xyz_summary(data["orderbooks"][depair]["ALL"])
             )
@@ -151,6 +153,8 @@ def summary_for_ticker(coin: str = "KMD"):
         resp = []
         decoin = deplatform.coin(coin)
         for depair in data["orderbooks"]:
+            if "ALL" not in data["orderbooks"][depair]:
+                continue
             item = data["orderbooks"][depair]["ALL"]
             if decoin in [item["base"], item["quote"]]:
                 resp.append(transform.ticker_to_xyz_summary(item))
