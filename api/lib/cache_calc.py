@@ -602,6 +602,12 @@ class CacheCalc:
                 prices = self.pair_prices_24hr_cache
                 if None not in [book, vols, last, prices]:
                     for depair in book["orderbooks"]:
+                        # Skip stub pairs carried forward as empty {} in the
+                        # orderbook cache (missing "ALL"). Reading ["ALL"]
+                        # below would raise KeyError and abort the whole
+                        # summary build, freezing the cache. See KMD_ETH.md.
+                        if "ALL" not in book["orderbooks"][depair]:
+                            continue
                         o = book["orderbooks"][depair]["ALL"]
                         lt = template.first_last_traded()
                         p = template.pair_prices_info(suffix="24hr")
@@ -1016,6 +1022,12 @@ class CMC:
                 last = self.calc.pairs_last_traded_cache
                 if None not in [book, vols, last]:
                     for depair in book["orderbooks"]:
+                        # Skip stub pairs carried forward as empty {} in the
+                        # orderbook cache (missing "ALL"). Reading ["ALL"]
+                        # below would raise KeyError and abort the whole
+                        # summary build, freezing the cache. See KMD_ETH.md.
+                        if "ALL" not in book["orderbooks"][depair]:
+                            continue
                         o = book["orderbooks"][depair]["ALL"]
                         lt = template.first_last_traded()
                         v = template.pair_volume_item(suffix="24hr")
