@@ -114,10 +114,13 @@ def gecko_orderbook(
             logger.warning("gecko_orderbook: pairs_orderbook_extended cache missing; falling back to direct fetch")
             book = {"orderbooks": {}}
         depair = deplatform.pair(pair_str)
-        if depair in book["orderbooks"]:
+        if depair in book["orderbooks"] and "ALL" in book["orderbooks"][depair]:
             data = book["orderbooks"][depair]["ALL"]
             return convert.orderbook_to_gecko(data, depth=depth)
-        elif invert.pair(depair) in book["orderbooks"]:
+        elif (
+            invert.pair(depair) in book["orderbooks"]
+            and "ALL" in book["orderbooks"][invert.pair(depair)]
+        ):
             data = book["orderbooks"][invert.pair(depair)]["ALL"]
             return convert.orderbook_to_gecko(data, depth=depth, reverse=True)
         # Use direct method if no cache.

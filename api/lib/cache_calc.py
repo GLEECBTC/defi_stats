@@ -838,6 +838,8 @@ class CacheCalc:
                         logger.warning(f"Inverting non standard pair {depair}")
                         depair = invert.pair(depair)
                     depair_orderbook = book["orderbooks"][depair]
+                    if "ALL" not in depair_orderbook:
+                        continue
 
                     if depaired:
                         v_data = depair_orderbook["ALL"]
