@@ -132,6 +132,12 @@ class Convert:
             }
         }
 
+    # DEAD CODE: this method has no callers anywhere in the codebase.
+    # Known bugs in the `reverse` branch (same class of bug fixed in
+    # orderbook_to_gecko): bids/asks are dicts from invert.ask_bid()
+    # instead of [[price, volume], ...] lists, the key is "ticker_id"
+    # instead of "pair", and total_asks_base_vol /
+    # total_bids_quote_vol are missing. Fix these before reusing.
     @timed
     def orderbook_to_stats_api(self, data, depth=100, reverse=False):
         if reverse:
