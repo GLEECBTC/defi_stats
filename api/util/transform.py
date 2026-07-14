@@ -166,8 +166,14 @@ class Convert:
                 "ticker_id": invert.pair(data["pair"]),
                 "timestamp": int(cron.now_utc()),
                 "variants": derive.pair_variants(pair_str=invert.pair(data["pair"])),
-                "asks": [invert.ask_bid(i) for i in data["bids"]][:depth],
-                "bids": [invert.ask_bid(i) for i in data["asks"]][:depth],
+                "asks": [
+                    [i["price"], i["volume"]]
+                    for i in (invert.ask_bid(x) for x in data["bids"])
+                ][:depth],
+                "bids": [
+                    [i["price"], i["volume"]]
+                    for i in (invert.ask_bid(x) for x in data["asks"])
+                ][:depth],
             }
         else:
             return {
