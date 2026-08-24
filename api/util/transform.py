@@ -557,8 +557,18 @@ class Derive:
         # This should be handled genericaly
         # there may be other places where this is an issue
         ticker = ticker.replace("-lightning", "").replace("-segwit", "")
-        if ticker in gecko_source:
-            return Decimal(gecko_source[ticker]["usd_market_cap"])
+        try:
+            if ticker in gecko_source:
+                mcap = gecko_source[ticker]["usd_market_cap"]
+                # Coingecko returns null for coins it has no circulating
+                # supply for. Treat it like an unknown ticker, so pair
+                # sorting stays deterministic instead of erroring out.
+                if mcap is not None:
+                    return Decimal(mcap)
+        except KeyError as e:  # pragma: no cover
+            logger.warning(f"Failed to get mcap for {ticker}: [KeyError] {e}")
+        except Exception as e:  # pragma: no cover
+            logger.warning(f"Failed to get mcap for {ticker}: {e}")
         return Decimal(0)
 
     @timed
