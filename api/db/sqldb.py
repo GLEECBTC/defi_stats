@@ -43,6 +43,21 @@ import util.validate as validate
 load_dotenv()
 
 
+def swap_log_context(swap_data):
+    """
+    Identifies a source swap row in a log message, so a
+    conversion failure can be traced back to its origin.
+    """
+    try:
+        return (
+            f"uuid: {swap_data.get('uuid')} | "
+            f"{swap_data.get('maker_coin')}/{swap_data.get('taker_coin')} | "
+            f"started_at: {swap_data.get('started_at')}"
+        )
+    except Exception as e:  # pragma: no cover
+        return f"unloggable swap data: {e}"
+
+
 class SqlDB:
     def __init__(
         self, db_type="pgsql", db_path=None, external=False, table=None
@@ -1404,13 +1419,26 @@ class SqlSource:
                     )
 
                     updates = []
+                    skipped = 0
                     for each in overlapping_swaps:
                         # logger.info(each.__dict__)
-                        
+
                         # Get dict row for existing swaps
-                        cipi_data = self.cipi_to_defi_swap(
+                        swap = self.cipi_to_defi_swap(
                             cipi_swaps_data[each.uuid], each.__dict__
-                        ).__dict__
+                        )
+                        if not isinstance(swap, DefiSwap):
+                            # A row we can not convert must never abort the
+                            # batch. Drop it from the queue (it is already in
+                            # the DB) and keep importing the rest.
+                            skipped += 1
+                            logger.warning(
+                                "Skipped Cipi swap update, conversion failed! "
+                                f"{swap_log_context(cipi_swaps_data[each.uuid])}"
+                            )
+                            cipi_swaps_data.pop(each.uuid)
+                            continue
+                        cipi_data = swap.__dict__
                         # create bindparam
                         cipi_data.update({"_id": each.id})
                         # remove id field to avoid contraint errors
@@ -1450,17 +1478,23 @@ class SqlSource:
                     # Add new records left in processing queue
                     for uuid in cipi_swaps_data.keys():
                         swap = self.cipi_to_defi_swap(cipi_swaps_data[uuid])
-
-                        if "_sa_instance_state" in swap:
-                            del swap["_sa_instance_state"]
-                        if "id" in swap:
-                            del swap["id"]
+                        if not isinstance(swap, DefiSwap):
+                            # One unconvertable row used to poison the whole
+                            # batch via `session.add(dict)`. Skip it instead.
+                            skipped += 1
+                            logger.warning(
+                                "Skipped Cipi swap, conversion failed! "
+                                f"{swap_log_context(cipi_swaps_data[uuid])}"
+                            )
+                            continue
                         if uuid not in valid_updates:
                             session.add(swap)
                     session.commit()
                     count_after = pgdb_query.get_count(start_time=1)
                     msg = f"{count_after - count} records added, "
                     msg += f"{len(valid_updates)} updated from Cipi database"
+                    if skipped > 0:
+                        msg += f", {skipped} skipped (conversion failed)"
             else:
                 msg = "Zero Cipi swaps returned!"
 
@@ -1499,12 +1533,25 @@ class SqlSource:
                     )
 
                     updates = []
+                    skipped = 0
                     overlapping_uuids = {each.uuid for each in overlapping_swaps}
                     for each in overlapping_swaps:
                         # Get dict row for existing swaps
-                        mm2_data = self.mm2_to_defi_swap(
+                        swap = self.mm2_to_defi_swap(
                             mm2_swaps_data[each.uuid], each.__dict__
-                        ).__dict__
+                        )
+                        if not isinstance(swap, DefiSwap):
+                            # A row we can not convert must never abort the
+                            # batch. Drop it from the queue (it is already in
+                            # the DB) and keep importing the rest.
+                            skipped += 1
+                            logger.warning(
+                                "Skipped MM2 swap update, conversion failed! "
+                                f"{swap_log_context(mm2_swaps_data[each.uuid])}"
+                            )
+                            mm2_swaps_data.pop(each.uuid)
+                            continue
+                        mm2_data = swap.__dict__
                         # create bindparam
                         mm2_data.update({"_id": each.id})
                         # remove id field to avoid contraint errors
@@ -1539,16 +1586,23 @@ class SqlSource:
                     # Add new records left in processing queue
                     for uuid in mm2_swaps_data.keys():
                         swap = self.mm2_to_defi_swap(mm2_swaps_data[uuid])
-                        if "_sa_instance_state" in swap:
-                            del swap["_sa_instance_state"]
-                        if "id" in swap:
-                            del swap["id"]
+                        if not isinstance(swap, DefiSwap):
+                            # One unconvertable row used to poison the whole
+                            # batch via `session.add(dict)`. Skip it instead.
+                            skipped += 1
+                            logger.warning(
+                                "Skipped MM2 swap, conversion failed! "
+                                f"{swap_log_context(mm2_swaps_data[uuid])}"
+                            )
+                            continue
                         if uuid not in overlapping_uuids:
                             session.add(swap)
                     session.commit()
                     count_after = pgdb_query.get_count(start_time=1)
                     msg = f"{count_after - count} records added, "
                     msg += f"{len(updates)} updated from MM2.db"
+                    if skipped > 0:
+                        msg += f", {skipped} skipped (conversion failed)"
             else:
                 msg = "Zero MM2 swaps returned!"
         except Exception as e:  # pragma: no cover

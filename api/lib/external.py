@@ -89,9 +89,13 @@ class CoinGeckoAPI:
             for coin_id, values in gecko_source.items():
                 coins = gecko_coins.get(coin_id, [])
                 for coin in coins:
-                    if "usd" in values:
+                    # Coingecko returns a null value for coins where it
+                    # has no data (e.g. no circulating supply for mcap).
+                    # Only overwrite the safe zero defaults from
+                    # `template.gecko_info` when the value is usable.
+                    if values.get("usd") is not None:
                         gecko_info[coin]["usd_price"] = values["usd"]
-                    if "usd_market_cap" in values:
+                    if values.get("usd_market_cap") is not None:
                         gecko_info[coin]["usd_market_cap"] = values["usd_market_cap"]
             time.sleep(0.1)
 
