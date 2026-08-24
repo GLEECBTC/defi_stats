@@ -8,5 +8,5 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "${ROOT_DIR}"
-/usr/bin/docker compose restart komodefi_8762
+/usr/bin/docker compose restart komodefi_8762 komodefi_6133
 
