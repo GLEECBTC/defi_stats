@@ -1,0 +1,5 @@
+/coins_monitoring.ini
+/coins_monitoring.state.json
+/coins_monitoring.state.json.*
+/coins_monitoring.lock
+*.log

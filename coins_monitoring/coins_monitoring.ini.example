@@ -1,0 +1,20 @@
+[github]
+repository = GLEECBTC/coins
+branch = master
+# Optional token for private repositories or a higher GitHub API rate limit.
+token =
+
+[docker]
+project_dir = /home/tech/defi_stats
+executable = /usr/bin/docker
+# Compose service name, not the container name (api).
+service = defi_stats
+restart_timeout = 180
+
+[telegram]
+bot_username = gleec_monitor_bot
+bot_token = REPLACE_WITH_BOT_TOKEN
+chat_id = REPLACE_WITH_CHAT_ID_FOR_REPORTS
+
+[monitor]
+http_timeout = 30
